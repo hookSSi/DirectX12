@@ -372,3 +372,6 @@ node_modules
 
 # temp Folder
 /[Tt]emp/
+
+# build folder
+/[Bb]uild/
