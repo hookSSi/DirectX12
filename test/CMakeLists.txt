@@ -9,7 +9,7 @@ project(
   LANGUAGES CXX
 )
 
-verbose_message("Adding tests under ${CMAKE_PROJECT_NAME}Tests...")
+verbose_message("${CMAKE_PROJECT_NAME}의 테스트를 추가중...")
 
 foreach(file ${test_sources})
   string(REGEX REPLACE "(.*/)([a-zA-Z0-9_ ]+)(\.cpp)" "\\2" test_name ${file}) 
@@ -20,16 +20,6 @@ foreach(file ${test_sources})
   #
 
   target_compile_features(${test_name}_Tests PUBLIC cxx_std_17)
-
-  #
-  # Setup code coverage if enabled
-  #
-
-  if (${CMAKE_PROJECT_NAME}_ENABLE_CODE_COVERAGE)
-    target_compile_options(${CMAKE_PROJECT_NAME} PUBLIC -O0 -g -fprofile-arcs -ftest-coverage)
-    target_link_options(${CMAKE_PROJECT_NAME} PUBLIC -fprofile-arcs -ftest-coverage)
-    verbose_message("Code coverage is enabled and provided with GCC.")
-  endif()
 
   #
   # Load the desired unit testing framework
@@ -43,7 +33,15 @@ foreach(file ${test_sources})
   endif()
 
   if(${CMAKE_PROJECT_NAME}_USE_GTEST)
-    find_package(GTest REQUIRED)
+    # GoogleTest 라이브러리 추가
+    include(FetchContent)
+    FetchContent_Declare(
+      googletest
+      URL https://github.com/google/googletest/archive/03597a01ee50ed33e9dfd640b249b4be3799d395.zip
+    )
+    # For Windows: Prevent overriding the parent project's compiler/linker settings
+    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+    FetchContent_MakeAvailable(googletest)
 
     if(${CMAKE_PROJECT_NAME}_USE_GOOGLE_MOCK)
       set(GOOGLE_MOCK_LIBRARIES GTest::gmock GTest::gmock_main)
@@ -52,21 +50,13 @@ foreach(file ${test_sources})
     target_link_libraries(
       ${test_name}_Tests
       PUBLIC
-        GTest::GTest
-        GTest::Main
+        GTest::gtest
+        GTest::gtest_main
         ${GOOGLE_MOCK_LIBRARIES}
         ${${CMAKE_PROJECT_NAME}_TEST_LIB}
     )
-  elseif(${CMAKE_PROJECT_NAME}_USE_CATCH2)
-    find_package(Catch2 REQUIRED)
-    target_link_libraries(
-      ${test_name}_Tests
-      PUBLIC
-        Catch2::Catch2
-        ${${CMAKE_PROJECT_NAME}_TEST_LIB}
-    )
   else()
-    message(FATAL_ERROR "Unknown testing library. Please setup your desired unit testing library by using `target_link_libraries`.")  
+    message(FATAL_ERROR "GoogleTest 라이브러리를 찾을 수 없습니다.")  
   endif()
 
   #
@@ -81,4 +71,4 @@ foreach(file ${test_sources})
   )
 endforeach()
 
-verbose_message("Finished adding unit tests for ${CMAKE_PROJECT_NAME}.")
+verbose_message("${CMAKE_PROJECT_NAME} 단위 테스트를 추가했습니다.")

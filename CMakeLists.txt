@@ -20,22 +20,15 @@ include(cmake/Utils.cmake)
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Debug")
 endif()
-message(STATUS "Started CMake for ${PROJECT_NAME} v${PROJECT_VERSION}...\n")
+message(STATUS "CMake 빌드 시작: ${PROJECT_NAME} v${PROJECT_VERSION}...\n")
 
 #
 # Prevent building in the source directory
 #
 
 if(PROJECT_SOURCE_DIR STREQUAL PROJECT_BINARY_DIR)
-  message(FATAL_ERROR "In-source builds not allowed. Please make a new directory (called a build directory) and run CMake from there.\n")
+  message(FATAL_ERROR "소스 디렉토리에서 빌드 불가. 새로운 빌드 디렉토리를 만들고 CMake를 그곳에서 실행하세요.\n")
 endif()
-
-#
-# Enable package managers
-#
-
-include(cmake/Conan.cmake)
-include(cmake/Vcpkg.cmake)
 
 #
 # Create library, setup header and source files
@@ -99,6 +92,7 @@ set_target_properties(
   LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib/${CMAKE_BUILD_TYPE}"
   RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/${CMAKE_BUILD_TYPE}"
 )
+
 if(${PROJECT_NAME}_BUILD_EXECUTABLE AND ${PROJECT_NAME}_ENABLE_UNIT_TESTING)
   set_target_properties(
     ${PROJECT_NAME}_LIB
@@ -109,7 +103,7 @@ if(${PROJECT_NAME}_BUILD_EXECUTABLE AND ${PROJECT_NAME}_ENABLE_UNIT_TESTING)
   )
 endif()
 
-message(STATUS "Added all header and implementation files.\n")
+message(STATUS "모든 헤더와 구현 파일을 추가했습니다.\n")
 
 #
 # Set the project standard and warnings
@@ -127,50 +121,7 @@ endif()
 include(cmake/CompilerWarnings.cmake)
 set_project_warnings(${PROJECT_NAME})
 
-verbose_message("Applied compiler warnings. Using standard ${CMAKE_CXX_STANDARD}.\n")
-
-#
-# Enable Doxygen
-#
-
-include(cmake/Doxygen.cmake)
-
-#
-# Model project dependencies
-#
-
-# Identify and link with the specific "packages" the project uses
-#find_package(package_name package_version REQUIRED package_type [other_options])
-#target_link_libraries(
-#  ${PROJECT_NAME}
-#  PUBLIC
-#    dependency1 ...
-#  PRIVATE
-#    dependency2 ...
-#    ${PROJECT_NAME}_PROJECT_OPTIONS
-#    ${PROJECT_NAME}_PROJECT_WARNINGS
-#)
-#if(${PROJECT_NAME}_BUILD_EXECUTABLE AND ${PROJECT_NAME}_ENABLE_UNIT_TESTING)
-#  target_link_libraries(
-#    ${PROJECT_NAME}_LIB
-#    PUBLIC
-#      dependency1 ...
-#  )
-#endif()
-
-# For Windows, it is necessary to link with the MultiThreaded library.
-# Depending on how the rest of the project's dependencies are linked, it might be necessary
-# to change the line to statically link with the library.
-#
-# This is done as follows:
-#
-# set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-#
-# On Linux and Mac this variable is ignored. If any issues rise from it, try commenting it out
-# and letting CMake decide how to link with it.
-set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
-
-verbose_message("Successfully added all dependencies and linked against them.")
+verbose_message("컴파일러 경고를 적용했습니다. 표준 ${CMAKE_CXX_STANDARD}을 사용합니다.\n")
 
 #
 # Set the build/user include directories
@@ -205,7 +156,7 @@ else()
   endif()
 endif()
 
-message(STATUS "Finished setting up include directories.")
+message(STATUS "include 디렉토리 설정이 완료되었습니다.")
 
 #
 # Provide alias to library for
@@ -217,7 +168,7 @@ else()
   add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 endif()
 
-verbose_message("Project is now aliased as ${PROJECT_NAME}::${PROJECT_NAME}.\n")
+verbose_message("프로젝트가 ${PROJECT_NAME}::${PROJECT_NAME}로 별칭되었습니다.\n")
 
 #
 # Format the project using the `clang-format` target (i.e: cmake --build build --target clang-format)
@@ -276,19 +227,6 @@ install(
 )
 
 #
-# Install the `include` directory
-#
-
-install(
-  DIRECTORY
-  include/${PROJECT_NAME_LOWERCASE}
-  DESTINATION
-  include
-)
-
-verbose_message("Install targets successfully built. Install with `cmake --build <build_directory> --target install --config <build_config>`.")
-
-#
 # Quick `ConfigVersion.cmake` creation
 #
 
@@ -317,30 +255,11 @@ install(
 )
 
 #
-# Generate export header if specified
-#
-
-if(${PROJECT_NAME}_GENERATE_EXPORT_HEADER)
-  include(GenerateExportHeader)
-  generate_export_header(${PROJECT_NAME})
-  install(
-    FILES
-    ${PROJECT_BINARY_DIR}/${PROJECT_NAME_LOWERCASE}_export.h
-    DESTINATION
-    include
-  )
-
-  message(STATUS "Generated the export header `${PROJECT_NAME_LOWERCASE}_export.h` and installed it.")
-endif()
-
-message(STATUS "Finished building requirements for installing the package.\n")
-
-#
 # Unit testing setup
 #
 
 if(${PROJECT_NAME}_ENABLE_UNIT_TESTING)
   enable_testing()
-  message(STATUS "Build unit tests for the project. Tests should always be found in the test folder\n")
+  message(STATUS "프로젝트 단위 테스트를 빌드합니다. 테스트는 항상 test 폴더에 있습니다.\n")
   add_subdirectory(test)
 endif()
