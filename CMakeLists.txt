@@ -34,11 +34,13 @@ endif()
 # Create library, setup header and source files
 #
 
+include(cmake/FindD3D12.cmake)
+
 # Find all headers and implementation files
 include(cmake/SourcesAndHeaders.cmake)
 
 if(${PROJECT_NAME}_BUILD_EXECUTABLE)
-  add_executable(${PROJECT_NAME} ${exe_sources})
+  add_executable(${PROJECT_NAME} WIN32 ${exe_sources})
 
   if(${PROJECT_NAME}_VERBOSE_OUTPUT)
     verbose_message("Found the following sources:")

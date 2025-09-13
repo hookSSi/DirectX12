@@ -1,7 +1,25 @@
-#include <iostream>
+#include "core/AppInitializer.h"
 
-int main()
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance, PSTR cmdLine,
+                   int showCmd)
 {
-    std::cout << "Hello, World!" << std::endl;
-    return 0;
+#if defined(DEBUG) | defined(_DEBUG)
+    _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+#endif
+
+    try
+    {
+        AppInitializer app(hInstance);
+        if (!app.Initialize())
+        {
+            return 0;
+        }
+
+        return app.Run();
+    }
+    catch (DxException &e)
+    {
+        MessageBox(nullptr, e.ToString().c_str(), L"HR Failed", MB_OK);
+        return 0;
+    }
 }

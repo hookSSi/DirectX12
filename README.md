@@ -13,7 +13,7 @@ curl -LJO "https://github.com/aminya/setup-cpp/releases/download/v0.5.7/setup_cp
 
 ```shell
 
-cmake -G Ninja -S . -B ./build
+cmake --preset debug
 
 cmake --build ./build
 
